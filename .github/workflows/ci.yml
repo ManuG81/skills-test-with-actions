@@ -1,64 +1,40 @@
-name: Step 1, Add a test workflow 
-
-# This step triggers after push to the ci.yml file on the ci branch.
-# This workflow updates from step 1 to step 2.
-
-# This will run every time we push to the ci.yml file on the ci branch.
-# Reference: https://docs.github.com/actions/learn-github-actions/events-that-trigger-workflows
+# This is a basic workflow to help you get started with Actions
+ 
+name: CI
+ 
+# Controls when the workflow will run
 on:
-  workflow_dispatch:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches:
-      - ci
-    paths:
-      - .github/workflows/ci.yml
-
-# Reference: https://docs.github.com/actions/security-guides/automatic-token-authentication
-permissions:
-  # Need `contents: read` to checkout the repository.
-  # Need `contents: write` to update the step metadata.
-  contents: write
-
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+ 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+ 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Get the current step to only run the main job when the learner is on the same step.
-  get_current_step:
-    name: Check current step number
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+ 
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - id: get_step
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+ 
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+ 
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
         run: |
-          echo "current_step=$(cat ./.github/steps/-step.txt)" >> $GITHUB_OUTPUT
-    outputs:
-      current_step: ${{ steps.get_step.outputs.current_step }}
-
-  on_push_ci_file:
-    name: On push ci file
-    needs: get_current_step
-
-    # We will only run this action when:
-    # 1. This repository isn't the template repository.
-    # 2. The step is currently 1.
-    # Reference: https://docs.github.com/actions/learn-github-actions/contexts
-    # Reference: https://docs.github.com/actions/learn-github-actions/expressions
-    if: >-
-      ${{ !github.event.repository.is_template
-          && needs.get_current_step.outputs.current_step == 1 }}
-
-    # We'll run Ubuntu for performance instead of Mac or Windows.
-    runs-on: ubuntu-latest
-
-    steps:
-      # We'll need to check out the repository so that we can edit the README.
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Let's get all the branches.
-
+          echo Add other actions to build,
+          echo test, and deploy your project.
       - name: Run markdown lint
         run: |
           npm install remark-cli remark-preset-lint-consistent
-          npx remark . --use remark-preset-lint-consistent --frail 
-
-          
+          npx remark . --use remark-preset-lint-consistent --frail
